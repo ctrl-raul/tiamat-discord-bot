@@ -8,7 +8,7 @@ const client = new Discord.Client();
 dotenv.config();
 
 client.on('message', msg => {
-  if (msg.author && msg.author.id === "219091519590629376") {
+  if (msg.author.id === "219091519590629376") {
     msg.react('🐸');
     msg.react('🚿');
   }
