@@ -2,15 +2,21 @@ import Discord from 'discord.js';
 import dotenv from 'dotenv';
 
 
-const client = new Discord.Client();
-
-
 dotenv.config();
 
-client.on('message', msg => {
-  if (msg.author.id === "219091519590629376") {
-    msg.react('🐸');
-    msg.react('🚿');
+
+const client = new Discord.Client();
+const targets = env('TARGET_USER_IDS').split(' ');
+
+
+client.on('message', async msg => {
+  if (targets.includes(msg.author.id)) {
+    try {
+      await msg.react('🐸');
+      await msg.react('🚿');
+    } catch (err) {
+      // cope
+    }
   }
 });
 
