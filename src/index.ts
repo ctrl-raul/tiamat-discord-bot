@@ -17,10 +17,10 @@ client.on('message', async msg => {
   const frogIt = targets.includes(msg.author.id) || matchFrog.test(msg.content);
   if (frogIt) {
     try {
-      await msg.react('🐸');
+      await msg.react('<:frog1:790563843088711700>');
       await msg.react('🚿');
     } catch (err) {
-      // cope
+      console.error('Failed to frog it :(')
     }
   }
 });

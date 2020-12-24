@@ -24,10 +24,11 @@ client.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
     const frogIt = targets.includes(msg.author.id) || matchFrog.test(msg.content);
     if (frogIt) {
         try {
-            yield msg.react('🐸');
+            yield msg.react('<:frog1:790563843088711700>');
             yield msg.react('🚿');
         }
         catch (err) {
+            console.error('Failed to frog it :(');
         }
     }
 }));
