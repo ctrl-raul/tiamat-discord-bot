@@ -14,9 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = __importDefault(require("discord.js"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const express_1 = __importDefault(require("express"));
 dotenv_1.default.config();
 const client = new discord_js_1.default.Client();
 const targets = env('TARGET_USER_IDS').split(' ');
+const app = express_1.default();
 client.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
     if (targets.includes(msg.author.id)) {
         try {
@@ -28,10 +30,17 @@ client.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
     }
 }));
 client.login(env('TOKEN'));
-function env(name) {
+app.listen(env('PORT', '3000'));
+app.get('/', (_, res) => {
+    res.send('Where are you going?');
+});
+function env(name, defaultValue) {
     const value = process.env[name];
     if (value) {
         return value;
+    }
+    if (typeof defaultValue === 'string') {
+        return defaultValue;
     }
     throw new TypeError(`Missing process.env.${name}`);
 }
