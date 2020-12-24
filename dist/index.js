@@ -19,8 +19,10 @@ dotenv_1.default.config();
 const client = new discord_js_1.default.Client();
 const targets = env('TARGET_USER_IDS').split(' ');
 const app = express_1.default();
+const matchFrog = /f+r+[o0]+g+|g+r+[e3]+n+[o0]+u+[i1]+l+[e3]+/i;
 client.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
-    if (targets.includes(msg.author.id)) {
+    const frogIt = targets.includes(msg.author.id) || matchFrog.test(msg.content);
+    if (frogIt) {
         try {
             yield msg.react('🐸');
             yield msg.react('🚿');

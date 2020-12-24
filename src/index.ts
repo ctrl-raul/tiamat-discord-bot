@@ -10,9 +10,12 @@ const client = new Discord.Client();
 const targets = env('TARGET_USER_IDS').split(' ');
 const app = express();
 
+const matchFrog = /f+r+[o0]+g+|g+r+[e3]+n+[o0]+u+[i1]+l+[e3]+/i;
+
 
 client.on('message', async msg => {
-  if (targets.includes(msg.author.id)) {
+  const frogIt = targets.includes(msg.author.id) || matchFrog.test(msg.content);
+  if (frogIt) {
     try {
       await msg.react('🐸');
       await msg.react('🚿');
