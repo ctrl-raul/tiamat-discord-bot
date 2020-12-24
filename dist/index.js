@@ -15,21 +15,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = __importDefault(require("discord.js"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
+const path_1 = __importDefault(require("path"));
+const DiscordCommandsManager_1 = __importDefault(require("./DiscordCommandsManager"));
 dotenv_1.default.config();
 const client = new discord_js_1.default.Client();
 const targets = env('TARGET_USER_IDS').split(' ');
 const app = express_1.default();
+const CMDM = DiscordCommandsManager_1.default('+', path_1.default.join(__dirname, './commands'));
 const matchFrog = /f+r+[o0]+g+|g+r+[e3]+n+[o0]+u+[i1]+l+[e3]+/i;
 client.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
-    const frogIt = targets.includes(msg.author.id) || matchFrog.test(msg.content);
-    if (frogIt) {
+    if (msg.author.bot) {
+        return;
+    }
+    if (targets.includes(msg.author.id) || matchFrog.test(msg.content)) {
         try {
             yield msg.react('<:frog1:790563843088711700>');
             yield msg.react('🚿');
         }
-        catch (err) {
-            console.error('Failed to frog it :(');
-        }
+        catch (err) { }
+    }
+    if (yield CMDM.evaluate(msg)) {
+        return;
     }
 }));
 client.login(env('TOKEN'));
@@ -47,4 +53,6 @@ function env(name, defaultValue) {
     }
     throw new TypeError(`Missing process.env.${name}`);
 }
+console.log(CMDM.cmds);
+console.log('Successfuly loaded', Object.keys(CMDM.cmds).length, 'command(s)!');
 //# sourceMappingURL=index.js.map
