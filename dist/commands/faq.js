@@ -13,7 +13,7 @@ const discord_js_1 = require("discord.js");
 exports.default = {
     name: 'faq',
     permissions: [],
-    execute({ msg }) {
+    execute({ msg, cmd }) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield msg.delete();
@@ -21,7 +21,7 @@ exports.default = {
                     .setColor('#161219')
                     .setTitle('Frequently Asked Questions')
                     .setDescription('https://community.supermechs.com/knowledgebase/faq/')
-                    .setFooter('+faq requested by ' + msg.author.tag));
+                    .setFooter(`+${cmd.name} requested by ${msg.author.tag}`));
                 return true;
             }
             catch (err) {
@@ -30,4 +30,3 @@ exports.default = {
         });
     }
 };
-//# sourceMappingURL=faq.js.map

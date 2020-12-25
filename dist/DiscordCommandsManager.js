@@ -100,4 +100,3 @@ function default_1(prefix, path) {
     };
 }
 exports.default = default_1;
-//# sourceMappingURL=DiscordCommandsManager.js.map

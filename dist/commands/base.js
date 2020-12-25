@@ -24,4 +24,3 @@ exports.default = {
         });
     }
 };
-//# sourceMappingURL=base.js.map

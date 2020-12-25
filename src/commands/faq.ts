@@ -7,7 +7,7 @@ export default {
 
   permissions: [],
 
-  async execute ({ msg }) {
+  async execute ({ msg, cmd }) {
     try {
       await msg.delete();
       await msg.channel.send(
@@ -15,7 +15,7 @@ export default {
           .setColor('#161219')
           .setTitle('Frequently Asked Questions')
           .setDescription('https://community.supermechs.com/knowledgebase/faq/')
-          .setFooter('+faq requested by ' + msg.author.tag)
+          .setFooter(`+${cmd.name} requested by ${msg.author.tag}`)
       );
       return true;
     } catch (err) {

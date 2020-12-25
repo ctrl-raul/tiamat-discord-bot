@@ -55,4 +55,3 @@ function env(name, defaultValue) {
 }
 console.log(CMDM.cmds);
 console.log('Successfuly loaded', Object.keys(CMDM.cmds).length, 'command(s)!');
-//# sourceMappingURL=index.js.map
