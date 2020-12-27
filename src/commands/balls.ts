@@ -1,18 +1,14 @@
-import { CommandModule } from '../DiscordCommandsManager';
+import { CommandModule } from '../libs/DiscordCommandsManager';
 
-export default {
-
-  name: 'balls',
+const command: CommandModule = {
 
   permissions: ['MANAGE_MESSAGES'],
 
-  async execute ({ msg }) {
-    try {
-      await msg.channel.send('If you keep behaving like that, you can PM <@336988655748907008> to remove your balls.');
-      return true;
-    } catch (err) {
-      return false;
-    }
+  execute ({ msg, onError }) {
+    msg.channel.send('If you keep behaving like that, you can PM <@336988655748907008> to remove your balls.')
+      .catch(onError);
   }
 
-} as CommandModule;
+};
+
+export default command;

@@ -11,15 +11,21 @@ interface CommandExecuteArguments {
   msg: Discord.Message;
   args: string;
   cmd: LoadedCommandModule;
+  prefix: string;
+  onError: (err: Error) => void;
 }
 
 export interface CommandModule {
-  name: string;
-  permissions: Discord.PermissionString[];
-  execute: (cea: CommandExecuteArguments) => (boolean | Promise<boolean>);
+  disabled?: boolean;
+  name?: string;
+  permissions?: Discord.PermissionString | Discord.PermissionString[];
+  execute: (cea: CommandExecuteArguments) => any;
 }
 
 interface LoadedCommandModule extends CommandModule {
+  permissions: Discord.PermissionString[];
+  name: string;
+  disabled: boolean;
   path: string;
 }
 
@@ -27,62 +33,74 @@ interface LoadedCommandModule extends CommandModule {
 function loadCommands (path: string, cmds: Commands = {}) {
 
   const contents = fs.readdirSync(_path.resolve(path));
-
-  // const isTSfile = /\.(?=ts$)/;
-
   const subdirs: string[] = [];
   const files: string[] = [];
 
 
-  for (const dir of contents) {
-
-    const filePath = _path.join(path, dir);
-    
-    if (fs.lstatSync(filePath).isDirectory()) {
-      subdirs.push(filePath);
+  for (const x of contents) {    
+    if (fs.lstatSync(_path.join(path, x)).isDirectory()) {
+      subdirs.push(x);
     } else {
-      files.push(filePath);
+      files.push(x);
     }
   }
 
-  for (const filePath of files) {
+  for (const fileName of files) {
 
-    const cmdModule: CommandModule = require(filePath).default;
+    const filePath = _path.join(path, fileName);
+    const required = require(filePath);
+    const cmdModule: CommandModule = required.default;
+
+    cmdModule.name ??= fileName.replace(/\.\w+$/i, '');
 
     if (cmds.hasOwnProperty(cmdModule.name)) {
 
-      const message = [
+      const messageLines = [
         `found two commands with the name '${cmdModule.name}'`,
         '  command paths:',
         '  ' + cmds[cmdModule.name].path,
         '  ' + filePath,
         ''
-      ].join('\n');
+      ];
 
-      throw new Error(message);
+      throw new Error(messageLines.join('\n'));
 
     } else if (cmdModule.name in cmds) {
 
-      const message = [
+      const messageLines = [
         `'${cmdModule.name}' cannot be used as a command name because it overrides a built-in Object property`,
         '  command path:',
         '  ' + filePath,
         ''
-      ].join('\n');
+      ];
 
-      throw new Error(message);
+      throw new Error(messageLines.join('\n'));
     }
 
+    const permissions: Discord.PermissionString[] = (
+      !cmdModule.permissions
+      ? []
+      : (typeof cmdModule.permissions === 'string'
+        ? [cmdModule.permissions]
+        : cmdModule.permissions
+        )
+    );
+
     cmds[cmdModule.name] = {
+
+      name: cmdModule.name,
+      execute: cmdModule.execute,
+      disabled: cmdModule.disabled || false,
+
       path: filePath,
-      ...cmdModule
+      permissions,
+
     };
 
   }
 
   for (const dir of subdirs) {
-    console.log(dir)
-    loadCommands(dir, cmds);
+    loadCommands(_path.join(path, dir), cmds);
   }
 
   return cmds;
@@ -99,13 +117,17 @@ export function hasPermissions (permissions: Readonly<Discord.Permissions>, requ
 }
 
 
-export default function (prefix: string, path: string) {
+export default function (prefix: string, path: string, logs: boolean = false) {
 
   const regexSafePrefix = prefix.replace(/([^\w])/g, '\\$1');
 	const cmdCall = new RegExp(`^${regexSafePrefix}([^\\s])+(?=\\s|)`, 'i');
   const badSpaces = /^\s+|\s+$|\s+(?=\s)/g;
   
   const cmds = loadCommands(path);
+
+  const errorLogger = (err: Error, cmd: CommandModule) => {
+    console.error(`Failed to execute command '${cmd.name}':`, err);
+  };
 
   return {
 
@@ -127,11 +149,23 @@ export default function (prefix: string, path: string) {
         if (msg.member) {
   
           const args = msg.content
-            .substring(prefix.length + 1) // Remove command call
+            .substring(prefix.length + cmd.name.length) // Remove command call
             .replace(badSpaces, ''); // Remove multiple spaces
             
           if (!cmd.permissions.length || hasPermissions(msg.member.permissions, cmd.permissions)) {
-            return await cmd.execute({ msg, args, cmd });
+
+            if (logs) {
+              console.log('Executing command', cmd.name);
+            }
+
+            cmd.execute({
+              msg,
+              args,
+              cmd,
+              prefix,
+              onError: (err: Error) => errorLogger(err, cmd)
+            });
+
           } else {
             msg.react('❌');
           }

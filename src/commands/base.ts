@@ -1,18 +1,14 @@
-import { CommandModule } from '../DiscordCommandsManager';
+import { CommandModule } from '../libs/DiscordCommandsManager';
 
-export default {
-
-  name: 'base',
+const command: CommandModule = {
 
   permissions: ['MANAGE_MESSAGES'],
 
-  async execute ({ msg }) {
-    try {
-      await msg.channel.send('Send a private message to <@336988655748907008> to remove your base.');
-      return true;
-    } catch (err) {
-      return false;
-    }
+  execute ({ msg, onError }) {
+    msg.channel.send('Send a private message to <@336988655748907008> to remove your base.')
+      .catch(onError);
   }
 
-} as CommandModule;
+};
+
+export default command;

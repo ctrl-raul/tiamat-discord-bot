@@ -2,31 +2,68 @@ import Discord from 'discord.js';
 import dotenv from 'dotenv';
 import express from 'express';
 import path from 'path';
-import discordCMDM from './DiscordCommandsManager';
+import discordCMDM from './libs/DiscordCommandsManager';
+import env from './utils/env';
 
 
 dotenv.config();
 
 
+const PREFIX_PROD = '+';
+const PREFIX_DEV = '-';
+const PREFIX = env('LOCALLY', 'false') === 'true' ? PREFIX_DEV : PREFIX_PROD;
+const matchFrog = /f+r+[o0]+g+|g+r+[e3]+n+[o0]+u+[i1]+l+[e3]+/i; // Matches variants of "frog" or "grenouille" (French for frog)
+
 const client = new Discord.Client();
-const targets = env('TARGET_USER_IDS').split(' ');
 const app = express();
-const CMDM = discordCMDM('+', path.join(__dirname, './commands'));
+const CMDM = discordCMDM(PREFIX, path.join(__dirname, './commands'), true);
+const froggerID = '219091519590629376';
 
-const matchFrog = /f+r+[o0]+g+|g+r+[e3]+n+[o0]+u+[i1]+l+[e3]+/i;
+
+init();
 
 
-client.on('message', async msg => {
+function onReady () {
 
+  if (!client.user) {
+    return;
+  }
+
+  client.user.setPresence({
+    status: 'online',
+    activity: { name: 'prefix: ' + PREFIX_PROD }
+  });
+
+  client.user.setUsername('Tiamat');
+
+  console.log(`Logged in as ${client.user.tag}!`);
+
+}
+
+async function onMessage (msg: Discord.Message): Promise<void> {
+
+  // Ignore messages from bots
   if (msg.author.bot) {
     return;
   }
 
-  if (targets.includes(msg.author.id) || matchFrog.test(msg.content)) {
+  if (msg.channel.type === 'dm' && msg.author.id !== client.user?.id) {
+    msg.channel.send(`I don't like DMs.`);
+    return;
+  }
+
+  if (
+    // Message from bluz and he's lucky
+    (msg.author.id === froggerID && Math.random() > 0.95)
+    // Or message contains frog in English or French
+    || (matchFrog.test(msg.content))
+  ) {
     try {
       await msg.react('<:frog1:790563843088711700>');
       await msg.react('🚿');
-    } catch (err) {}
+    } catch (err) {
+      console.error('Failed to react with frog:', err);
+    }
   }
 
   if (await CMDM.evaluate(msg)) {
@@ -34,31 +71,20 @@ client.on('message', async msg => {
   }
 
   // Do something here if it's not a command?
-});
-
-client.login(env('TOKEN'));
-
-app.listen(env('PORT', '3000'));
-
-app.get('/', (_, res) => {
-  res.send('Where are you going?');
-});
-
-
-function env (name: string, defaultValue?: string): string {
-  
-  const value = process.env[name];
-
-  if (value) {
-    return value;
-  }
-
-  if (typeof defaultValue === 'string') {
-    return defaultValue;
-  }
-
-  throw new TypeError(`Missing process.env.${name}`);
 }
 
-console.log(CMDM.cmds);
-console.log('Successfuly loaded', Object.keys(CMDM.cmds).length, 'command(s)!');
+function init () {
+
+  const PORT = env('PORT', '3000');
+  const commandNames = Object.keys(CMDM.cmds);
+
+  client.on('ready', onReady);
+  client.on('message', onMessage);
+  client.login(env('TOKEN'));
+  
+  app.listen(PORT, () => console.log('Listening on port', PORT));
+  app.get('/', (_, res) => res.send('Where are you going?'));
+
+  console.log('Successfuly loaded', commandNames.length, 'command(s)!');
+  console.log(commandNames);
+}
