@@ -31,7 +31,9 @@ function onReady () {
 
   client.user.setPresence({
     status: 'online',
-    activity: { name: 'prefix: ' + PREFIX_PROD }
+    activity: {
+      name: 'prefix: ' + PREFIX_PROD
+    }
   });
 
   client.user.setUsername('Tiamat');
