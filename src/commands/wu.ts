@@ -1,22 +1,21 @@
-import { MessageEmbed } from 'discord.js';
+import embedLink from '../utils/embedLink';
 import { CommandModule } from '../libs/DiscordCommandsManager';
 
 
 const command: CommandModule = {
 
-  disabled: true,
+  enabled: false,
 
-  execute ({ msg, cmd, prefix, onError }) {
+  execute (args) {
 
-    const replyLines = [
+    const { msg, onError } = args;
+
+    const embed = embedLink(
+      'Workshop Unlimited',
       'https://workshop-unlimited.vercel.app/',
-      '\u200b',
-      prefix + cmd.name + ' requested by <@' + msg.author.id + '>'
-    ];
-
-    const embed = new MessageEmbed()
-      .setColor('#06222a')
-      .addField('Workshop Unlimited', replyLines.join('\n'))
+      '#06222a',
+      args
+    );
 
     msg.channel.send(embed).catch(onError)
     msg.delete().catch();

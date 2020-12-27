@@ -9,9 +9,9 @@ const command: CommandModule = {
     const { msg, onError } = args;
 
     const embed = embedLink(
-      'Frequently Asked Questions',
-      'https://community.supermechs.com/knowledgebase/faq/',
-      '#161219',
+      'Report a potential Cheater',
+      'https://docs.google.com/forms/d/e/1FAIpQLSdpTi7ARgV-5ncdfXi2QzEOUXGlSM-1XN6IrMqyjknFyk0yxA/viewform',
+      '#aaaaaa',
       args
     );
 

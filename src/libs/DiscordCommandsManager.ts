@@ -7,7 +7,7 @@ interface Commands {
   [key: string]: LoadedCommandModule;
 }
 
-interface CommandExecuteArguments {
+export interface CommandExecuteArguments {
   msg: Discord.Message;
   args: string;
   cmd: LoadedCommandModule;
@@ -16,7 +16,7 @@ interface CommandExecuteArguments {
 }
 
 export interface CommandModule {
-  disabled?: boolean;
+  enabled?: boolean;
   name?: string;
   permissions?: Discord.PermissionString | Discord.PermissionString[];
   execute: (cea: CommandExecuteArguments) => any;
@@ -25,7 +25,7 @@ export interface CommandModule {
 interface LoadedCommandModule extends CommandModule {
   permissions: Discord.PermissionString[];
   name: string;
-  disabled: boolean;
+  enabled: boolean;
   path: string;
 }
 
@@ -90,7 +90,7 @@ function loadCommands (path: string, cmds: Commands = {}) {
 
       name: cmdModule.name,
       execute: cmdModule.execute,
-      disabled: cmdModule.disabled || false,
+      enabled: cmdModule.enabled ?? true,
 
       path: filePath,
       permissions,
@@ -145,6 +145,11 @@ export default function (prefix: string, path: string, logs: boolean = false) {
       const cmd = cmds[cmdName];
   
       if (typeof cmd !== 'undefined') {
+
+        if (!cmd.enabled) {
+          msg.react('❌');
+          return true;
+        }
   
         if (msg.member) {
   

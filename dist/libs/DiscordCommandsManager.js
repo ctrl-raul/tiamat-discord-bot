@@ -16,7 +16,7 @@ exports.hasPermissions = void 0;
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 function loadCommands(path, cmds = {}) {
-    var _a;
+    var _a, _b;
     const contents = fs_1.default.readdirSync(path_1.default.resolve(path));
     const subdirs = [];
     const files = [];
@@ -60,7 +60,7 @@ function loadCommands(path, cmds = {}) {
         cmds[cmdModule.name] = {
             name: cmdModule.name,
             execute: cmdModule.execute,
-            disabled: cmdModule.disabled || false,
+            enabled: (_b = cmdModule.enabled) !== null && _b !== void 0 ? _b : true,
             path: filePath,
             permissions,
         };
@@ -98,6 +98,10 @@ function default_1(prefix, path, logs = false) {
                 const cmdName = match[0].substring(prefix.length);
                 const cmd = cmds[cmdName];
                 if (typeof cmd !== 'undefined') {
+                    if (!cmd.enabled) {
+                        msg.react('❌');
+                        return true;
+                    }
                     if (msg.member) {
                         const args = msg.content
                             .substring(prefix.length + cmd.name.length)

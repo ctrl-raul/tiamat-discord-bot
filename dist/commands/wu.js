@@ -1,17 +1,14 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const discord_js_1 = require("discord.js");
+const embedLink_1 = __importDefault(require("../utils/embedLink"));
 const command = {
-    disabled: true,
-    execute({ msg, cmd, prefix, onError }) {
-        const replyLines = [
-            'https://workshop-unlimited.vercel.app/',
-            '\u200b',
-            prefix + cmd.name + ' requested by <@' + msg.author.id + '>'
-        ];
-        const embed = new discord_js_1.MessageEmbed()
-            .setColor('#06222a')
-            .addField('Workshop Unlimited', replyLines.join('\n'));
+    enabled: false,
+    execute(args) {
+        const { msg, onError } = args;
+        const embed = embedLink_1.default('Workshop Unlimited', 'https://workshop-unlimited.vercel.app/', '#06222a', args);
         msg.channel.send(embed).catch(onError);
         msg.delete().catch();
     }
