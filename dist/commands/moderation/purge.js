@@ -9,21 +9,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const matchUintAtStart = /^\d+(?=(\s|$))/;
 const command = {
     permissions: ['MANAGE_MESSAGES'],
     execute({ msg, args, onError }) {
         return __awaiter(this, void 0, void 0, function* () {
             if (msg.channel.type === 'dm') {
-                msg.channel.send('Can not purge in DMs.');
+                msg.channel.send('Can not purge in DMs.').catch();
                 return;
             }
-            const limit = 1 + Math.max(1, Math.min(100, Number(args.match(/^\d+/)) || 1));
-            try {
-                yield msg.channel.bulkDelete(yield msg.channel.messages.fetch({ limit }));
+            let limit = 2;
+            if (args.length) {
+                const match = args.match(matchUintAtStart);
+                if (match) {
+                    limit = 1 + Math.min(99, Number(match[0]) || 1);
+                }
+                else {
+                    msg.react('❌').catch();
+                    return;
+                }
             }
-            catch (err) {
-                onError(err);
-            }
+            msg.channel.messages.fetch({ limit })
+                .then(msg.channel.bulkDelete)
+                .catch(onError);
         });
     }
 };

@@ -1,5 +1,9 @@
 import { CommandModule } from '../../libs/DiscordCommandsManager';
 
+// TODO: Keep pins
+// TODO: Delete messages from specific users
+
+const matchUintAtStart = /^\d+(?=(\s|$))/;
 
 const command: CommandModule = {
 
@@ -7,24 +11,26 @@ const command: CommandModule = {
 
   async execute ({ msg, args, onError }) {
 
-    // TODO: Keep pins
-    // TODO: Delete messages from specific users
-
     if (msg.channel.type === 'dm') {
-      msg.channel.send('Can not purge in DMs.');
+      msg.channel.send('Can not purge in DMs.').catch();
       return;
     }
 
-    const limit = 1 + Math.max(1, Math.min(100, Number(args.match(/^\d+/)) || 1));
+    let limit = 2;
 
-    try {
-      await msg.channel.bulkDelete(
-        await msg.channel.messages.fetch({ limit })
-      );
-    } catch (err) {
-      onError(err);
+    if (args.length) {
+      const match = args.match(matchUintAtStart);
+      if (match) {
+        limit = 1 + Math.min(99, Number(match[0]) || 1);
+      } else {
+        msg.react('❌').catch();
+        return;
+      }
     }
 
+    msg.channel.messages.fetch({ limit })
+      .then(msg.channel.bulkDelete)
+      .catch(onError);
   }
 
 };

@@ -181,5 +181,5 @@ export default function (prefix: string, path: string, logs: boolean = false) {
       return false;
     }
 
-  }
+  };
 }

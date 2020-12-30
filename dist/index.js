@@ -27,6 +27,7 @@ const client = new discord_js_1.default.Client();
 const app = express_1.default();
 const CMDM = DiscordCommandsManager_1.default(PREFIX, path_1.default.join(__dirname, './commands'), true);
 const froggerID = '219091519590629376';
+const matchKillin = /i+ll+i+n+(?!g)/i || /k+i+l+i+n+/i;
 init();
 function onReady() {
     if (!client.user) {
@@ -59,6 +60,14 @@ function onMessage(msg) {
             }
             catch (err) {
                 console.error('Failed to react with frog:', err);
+            }
+        }
+        if (matchKillin.test(msg.content)) {
+            try {
+                yield msg.react('<:hacker:793643471084847144>');
+            }
+            catch (err) {
+                console.error('Failed to react with hacker:', err);
             }
         }
         if (yield CMDM.evaluate(msg)) {
