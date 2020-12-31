@@ -52,7 +52,7 @@ function onMessage(msg) {
             msg.channel.send(`I don't like DMs.`);
             return;
         }
-        if ((msg.author.id === froggerID && Math.random() > 0.925)
+        if ((msg.author.id === froggerID && Math.random() > 0.5)
             || (matchFrog.test(msg.content))) {
             try {
                 yield msg.react('<:frog1:790563843088711700>');
