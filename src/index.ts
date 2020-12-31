@@ -55,9 +55,10 @@ async function onMessage (msg: Discord.Message): Promise<void> {
     return;
   }
 
+  
   if (
     // Message from bluz and he's lucky
-    (msg.author.id === froggerID && Math.random() > 0.95)
+    (msg.author.id === froggerID && Math.random() > 0.925)
     // Or message contains frog in English or French
     || (matchFrog.test(msg.content))
   ) {
