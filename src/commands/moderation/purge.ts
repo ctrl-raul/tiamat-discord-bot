@@ -28,9 +28,12 @@ const command: CommandModule = {
       }
     }
 
-    msg.channel.messages.fetch({ limit })
-      .then(msg.channel.bulkDelete)
-      .catch(onError);
+    try {
+      const msgsToDelete = await msg.channel.messages.fetch({ limit });
+      await msg.channel.bulkDelete(msgsToDelete);
+    } catch(err) {
+      onError(err);
+    }
   }
 
 };

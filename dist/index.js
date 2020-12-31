@@ -17,6 +17,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
 const path_1 = __importDefault(require("path"));
 const DiscordCommandsManager_1 = __importDefault(require("./libs/DiscordCommandsManager"));
+const disableBaseTip_1 = __importDefault(require("./misc/disableBaseTip"));
 const env_1 = __importDefault(require("./utils/env"));
 dotenv_1.default.config();
 const PREFIX_PROD = '+';
@@ -27,6 +28,7 @@ const client = new discord_js_1.default.Client();
 const app = express_1.default();
 const CMDM = DiscordCommandsManager_1.default(PREFIX, path_1.default.join(__dirname, './commands'), true);
 const froggerID = '219091519590629376';
+const turtlerID = '713530503331840051';
 const matchKillin = /i+ll+i+n+(?!g)/i || /k+i+l+i+n+/i;
 init();
 function onReady() {
@@ -53,7 +55,7 @@ function onMessage(msg) {
             return;
         }
         if ((msg.author.id === froggerID && Math.random() > 0.5)
-            || (matchFrog.test(msg.content))) {
+            || matchFrog.test(msg.content)) {
             try {
                 yield msg.react('<:frog1:790563843088711700>');
                 yield msg.react('🚿');
@@ -61,6 +63,16 @@ function onMessage(msg) {
             catch (err) {
                 console.error('Failed to react with frog:', err);
             }
+            return;
+        }
+        if (msg.author.id === turtlerID && Math.random() > 0.95) {
+            try {
+                yield msg.react('🐢');
+            }
+            catch (err) {
+                console.error('Failed to react with turtle:', err);
+            }
+            return;
         }
         if (matchKillin.test(msg.content)) {
             try {
@@ -69,6 +81,10 @@ function onMessage(msg) {
             catch (err) {
                 console.error('Failed to react with hacker:', err);
             }
+            return;
+        }
+        if (yield disableBaseTip_1.default(msg)) {
+            return;
         }
         if (yield CMDM.evaluate(msg)) {
             return;

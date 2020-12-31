@@ -29,9 +29,13 @@ const command = {
                     return;
                 }
             }
-            msg.channel.messages.fetch({ limit })
-                .then(msg.channel.bulkDelete)
-                .catch(onError);
+            try {
+                const msgsToDelete = yield msg.channel.messages.fetch({ limit });
+                yield msg.channel.bulkDelete(msgsToDelete);
+            }
+            catch (err) {
+                onError(err);
+            }
         });
     }
 };

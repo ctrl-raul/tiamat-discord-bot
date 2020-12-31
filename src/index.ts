@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import path from 'path';
 import discordCMDM from './libs/DiscordCommandsManager';
+import disableBaseTip from './misc/disableBaseTip';
 import env from './utils/env';
 
 
@@ -18,7 +19,8 @@ const client = new Discord.Client();
 const app = express();
 const CMDM = discordCMDM(PREFIX, path.join(__dirname, './commands'), true);
 const froggerID = '219091519590629376';
-const matchKillin = /i+ll+i+n+(?!g)/i || /k+i+l+i+n+/i; //
+const turtlerID = '713530503331840051';
+const matchKillin = /i+ll+i+n+(?!g)/i || /k+i+l+i+n+/i;
 
 
 init();
@@ -55,12 +57,9 @@ async function onMessage (msg: Discord.Message): Promise<void> {
     return;
   }
 
-
   if (
-    // Message from bluz and he's lucky
     (msg.author.id === froggerID && Math.random() > 0.5)
-    // Or message contains frog in English or French
-    || (matchFrog.test(msg.content))
+    || matchFrog.test(msg.content)
   ) {
     try {
       await msg.react('<:frog1:790563843088711700>');
@@ -68,6 +67,16 @@ async function onMessage (msg: Discord.Message): Promise<void> {
     } catch (err) {
       console.error('Failed to react with frog:', err);
     }
+    return;
+  }
+
+  if (msg.author.id === turtlerID && Math.random() > 0.95) {
+    try {
+      await msg.react('🐢');
+    } catch (err) {
+      console.error('Failed to react with turtle:', err);
+    }
+    return;
   }
 
   if (matchKillin.test(msg.content)) {
@@ -76,13 +85,16 @@ async function onMessage (msg: Discord.Message): Promise<void> {
     } catch (err) {
       console.error('Failed to react with hacker:', err);
     }
+    return;
+  }
+
+  if (await disableBaseTip(msg)) {
+    return;
   }
 
   if (await CMDM.evaluate(msg)) {
     return;
   }
-
-  // Do something here if it's not a command?
 }
 
 function init () {
