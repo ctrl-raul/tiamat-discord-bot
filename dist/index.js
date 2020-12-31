@@ -52,7 +52,6 @@ function onMessage(msg) {
         }
         if (msg.channel.type === 'dm' && msg.author.id !== ((_a = client.user) === null || _a === void 0 ? void 0 : _a.id)) {
             msg.channel.send(`I don't like DMs.`);
-            return;
         }
         if ((msg.author.id === froggerID && Math.random() > 0.5)
             || matchFrog.test(msg.content)) {
@@ -63,7 +62,6 @@ function onMessage(msg) {
             catch (err) {
                 console.error('Failed to react with frog:', err);
             }
-            return;
         }
         if (msg.author.id === turtlerID && Math.random() > 0.95) {
             try {
@@ -72,7 +70,6 @@ function onMessage(msg) {
             catch (err) {
                 console.error('Failed to react with turtle:', err);
             }
-            return;
         }
         if (matchKillin.test(msg.content)) {
             try {
@@ -81,14 +78,9 @@ function onMessage(msg) {
             catch (err) {
                 console.error('Failed to react with hacker:', err);
             }
-            return;
         }
-        if (yield disableBaseTip_1.default(msg)) {
-            return;
-        }
-        if (yield CMDM.evaluate(msg)) {
-            return;
-        }
+        disableBaseTip_1.default(msg);
+        CMDM.evaluate(msg);
     });
 }
 function init() {
