@@ -54,7 +54,6 @@ async function onMessage (msg: Discord.Message): Promise<void> {
 
   if (msg.channel.type === 'dm' && msg.author.id !== client.user?.id) {
     msg.channel.send(`I don't like DMs.`);
-    return;
   }
 
   if (
@@ -67,7 +66,6 @@ async function onMessage (msg: Discord.Message): Promise<void> {
     } catch (err) {
       console.error('Failed to react with frog:', err);
     }
-    return;
   }
 
   if (msg.author.id === turtlerID && Math.random() > 0.95) {
@@ -76,7 +74,6 @@ async function onMessage (msg: Discord.Message): Promise<void> {
     } catch (err) {
       console.error('Failed to react with turtle:', err);
     }
-    return;
   }
 
   if (matchKillin.test(msg.content)) {
@@ -85,16 +82,10 @@ async function onMessage (msg: Discord.Message): Promise<void> {
     } catch (err) {
       console.error('Failed to react with hacker:', err);
     }
-    return;
   }
 
-  if (await disableBaseTip(msg)) {
-    return;
-  }
-
-  if (await CMDM.evaluate(msg)) {
-    return;
-  }
+  disableBaseTip(msg);
+  CMDM.evaluate(msg);
 }
 
 function init () {
