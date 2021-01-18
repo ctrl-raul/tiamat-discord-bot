@@ -34,8 +34,13 @@ const command = {
                             after: mostRecent.id,
                             limit: 100
                         });
+                        const first = latest100Msgs.first();
+                        if (!first) {
+                            onError(new Error('No most recent message'));
+                            return;
+                        }
                         msgsToDelete.push(...latest100Msgs.values());
-                        mostRecent = latest100Msgs.first();
+                        mostRecent = first;
                     } while (mostRecent.createdTimestamp < msg.createdTimestamp);
                 }
                 catch (err) {
