@@ -1,6 +1,5 @@
 import Discord from 'discord.js';
 import dotenv from 'dotenv';
-import express from 'express';
 import path from 'path';
 import discordCMDM from './libs/DiscordCommandsManager';
 import disableBaseTip from './misc/disableBaseTip';
@@ -16,11 +15,10 @@ const PREFIX = env('LOCALLY', 'false') === 'true' ? PREFIX_DEV : PREFIX_PROD;
 const matchFrog = /f+r+[o0]+g+|g+r+[e3]+n+[o0]+u+[i1]+l+[e3]+/i; // Matches variants of "frog" or "grenouille" (French for frog)
 
 const client = new Discord.Client();
-const app = express();
 const CMDM = discordCMDM(PREFIX, path.join(__dirname, './commands'), true);
 const froggerID = '219091519590629376';
 const turtlerID = '713530503331840051';
-const matchKillin = /i+ll+i+n+(?!g)/i || /k+i+l+i+n+/i;
+const matchKillin = /k+i+l+i+n+(?!g)/i;
 
 
 init();
@@ -33,7 +31,7 @@ function onReady () {
   }
 
   client.user.setPresence({
-    status: 'online',
+    status: 'dnd',
     activity: {
       name: 'prefix: ' + PREFIX_PROD
     }
@@ -56,32 +54,21 @@ async function onMessage (msg: Discord.Message): Promise<void> {
     msg.channel.send(`I don't like DMs.`);
   }
 
-  if (
-    (msg.author.id === froggerID && Math.random() > 0.5)
-    || matchFrog.test(msg.content)
-  ) {
-    try {
-      await msg.react('<:frog1:790563843088711700>');
-      await msg.react('🚿');
-    } catch (err) {
-      console.error('Failed to react with frog:', err);
-    }
+  if (matchFrog.test(msg.content)) {
+    msg.react('<:frog1:790563843088711700>').catch();
+  }
+
+  if (msg.author.id === froggerID && Math.random() > 0.5) {
+    msg.react('<:frog1:790563843088711700>').catch();
+    msg.react('🚿').catch();
   }
 
   if (msg.author.id === turtlerID && Math.random() > 0.95) {
-    try {
-      await msg.react('🐢');
-    } catch (err) {
-      console.error('Failed to react with turtle:', err);
-    }
+    msg.react('🐢').catch();
   }
 
   if (matchKillin.test(msg.content)) {
-    try {
-      await msg.react('<:hacker:793643471084847144>');
-    } catch (err) {
-      console.error('Failed to react with hacker:', err);
-    }
+    await msg.react('<:hacker:793643471084847144>');
   }
 
   disableBaseTip(msg);
@@ -90,15 +77,11 @@ async function onMessage (msg: Discord.Message): Promise<void> {
 
 function init () {
 
-  const PORT = env('PORT', '3000');
   const commandNames = Object.keys(CMDM.cmds);
 
   client.on('ready', onReady);
   client.on('message', onMessage);
   client.login(env('TOKEN'));
-  
-  app.listen(PORT, () => console.log('Listening on port', PORT));
-  app.get('/', (_, res) => res.send('Where are you going?'));
 
   console.log('Successfuly loaded', commandNames.length, 'command(s)!');
   console.log(commandNames);

@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = __importDefault(require("discord.js"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const express_1 = __importDefault(require("express"));
 const path_1 = __importDefault(require("path"));
 const DiscordCommandsManager_1 = __importDefault(require("./libs/DiscordCommandsManager"));
 const disableBaseTip_1 = __importDefault(require("./misc/disableBaseTip"));
@@ -25,18 +24,17 @@ const PREFIX_DEV = '-';
 const PREFIX = env_1.default('LOCALLY', 'false') === 'true' ? PREFIX_DEV : PREFIX_PROD;
 const matchFrog = /f+r+[o0]+g+|g+r+[e3]+n+[o0]+u+[i1]+l+[e3]+/i;
 const client = new discord_js_1.default.Client();
-const app = express_1.default();
 const CMDM = DiscordCommandsManager_1.default(PREFIX, path_1.default.join(__dirname, './commands'), true);
 const froggerID = '219091519590629376';
 const turtlerID = '713530503331840051';
-const matchKillin = /i+ll+i+n+(?!g)/i || /k+i+l+i+n+/i;
+const matchKillin = /k+i+l+i+n+(?!g)/i;
 init();
 function onReady() {
     if (!client.user) {
         return;
     }
     client.user.setPresence({
-        status: 'online',
+        status: 'dnd',
         activity: {
             name: 'prefix: ' + PREFIX_PROD
         }
@@ -53,44 +51,28 @@ function onMessage(msg) {
         if (msg.channel.type === 'dm' && msg.author.id !== ((_a = client.user) === null || _a === void 0 ? void 0 : _a.id)) {
             msg.channel.send(`I don't like DMs.`);
         }
-        if ((msg.author.id === froggerID && Math.random() > 0.5)
-            || matchFrog.test(msg.content)) {
-            try {
-                yield msg.react('<:frog1:790563843088711700>');
-                yield msg.react('🚿');
-            }
-            catch (err) {
-                console.error('Failed to react with frog:', err);
-            }
+        if (matchFrog.test(msg.content)) {
+            msg.react('<:frog1:790563843088711700>').catch();
+        }
+        if (msg.author.id === froggerID && Math.random() > 0.5) {
+            msg.react('<:frog1:790563843088711700>').catch();
+            msg.react('🚿').catch();
         }
         if (msg.author.id === turtlerID && Math.random() > 0.95) {
-            try {
-                yield msg.react('🐢');
-            }
-            catch (err) {
-                console.error('Failed to react with turtle:', err);
-            }
+            msg.react('🐢').catch();
         }
         if (matchKillin.test(msg.content)) {
-            try {
-                yield msg.react('<:hacker:793643471084847144>');
-            }
-            catch (err) {
-                console.error('Failed to react with hacker:', err);
-            }
+            yield msg.react('<:hacker:793643471084847144>');
         }
         disableBaseTip_1.default(msg);
         CMDM.evaluate(msg);
     });
 }
 function init() {
-    const PORT = env_1.default('PORT', '3000');
     const commandNames = Object.keys(CMDM.cmds);
     client.on('ready', onReady);
     client.on('message', onMessage);
     client.login(env_1.default('TOKEN'));
-    app.listen(PORT, () => console.log('Listening on port', PORT));
-    app.get('/', (_, res) => res.send('Where are you going?'));
     console.log('Successfuly loaded', commandNames.length, 'command(s)!');
     console.log(commandNames);
 }

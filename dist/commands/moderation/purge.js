@@ -8,35 +8,71 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const matchUintAtStart = /^\d+(?=(\s|$))/;
+const discord_js_1 = __importDefault(require("discord.js"));
+const matchMsgID = /\d{18}$/;
 const command = {
     permissions: ['MANAGE_MESSAGES'],
     execute({ msg, args, onError }) {
         return __awaiter(this, void 0, void 0, function* () {
             if (msg.channel.type === 'dm') {
-                msg.channel.send('Can not purge in DMs.').catch();
+                onError(new Error('Cannot purge direct messages'));
                 return;
             }
-            let limit = 2;
-            if (args.length) {
-                const match = args.match(matchUintAtStart);
-                if (match) {
-                    limit = 1 + Math.min(99, Number(match[0]) || 1);
+            const match = args.match(matchMsgID);
+            if (match !== null) {
+                const argumentMsgID = match[0];
+                const msgsToDelete = [];
+                const msgsPerBatch = 100;
+                try {
+                    let mostRecent = yield msg.channel.messages.fetch(argumentMsgID);
+                    do {
+                        const latest100Msgs = yield msg.channel.messages.fetch({
+                            after: mostRecent.id,
+                            limit: 100
+                        });
+                        msgsToDelete.push(...latest100Msgs.values());
+                        mostRecent = latest100Msgs.first();
+                    } while (mostRecent.createdTimestamp < msg.createdTimestamp);
                 }
-                else {
-                    msg.react('❌').catch();
+                catch (err) {
+                    onError(err);
                     return;
                 }
-            }
-            try {
-                const msgsToDelete = yield msg.channel.messages.fetch({ limit });
-                yield msg.channel.bulkDelete(msgsToDelete);
-            }
-            catch (err) {
-                onError(err);
+                let msgsTooOldCounter = 0;
+                let deleteAttemptsFailed = 0;
+                for (let page = 0; page < msgsToDelete.length / msgsPerBatch; page++) {
+                    const msgsToDeleteCollection = new discord_js_1.default.Collection();
+                    const currentPageMsgs = msgsToDelete.slice(page * msgsPerBatch, page * msgsPerBatch + msgsPerBatch);
+                    for (const msg_b of currentPageMsgs) {
+                        if (passedTwoWeeks(msg_b.createdTimestamp)) {
+                            msgsTooOldCounter++;
+                        }
+                        else if (!msg_b.pinned) {
+                            msgsToDeleteCollection.set(msg_b.id, msg_b);
+                        }
+                    }
+                    try {
+                        yield msg.channel.bulkDelete(msgsToDeleteCollection);
+                    }
+                    catch (err) {
+                        deleteAttemptsFailed += msgsPerBatch;
+                    }
+                }
+                if (msgsTooOldCounter) {
+                    msg.channel.send(`Could not delete ${msgsTooOldCounter} messages because they are older than two weeks.`);
+                }
+                if (deleteAttemptsFailed) {
+                    msg.channel.send(`Failed to delete ${deleteAttemptsFailed} messages, please try again.`);
+                }
             }
         });
     }
 };
+function passedTwoWeeks(timestamp) {
+    return timestamp <= Date.now() - 14 * 24 * 60 * 60 * 1000;
+}
 exports.default = command;
