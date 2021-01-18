@@ -17,7 +17,6 @@ const matchFrog = /f+r+[o0]+g+|g+r+[e3]+n+[o0]+u+[i1]+l+[e3]+/i; // Matches vari
 const client = new Discord.Client();
 const CMDM = discordCMDM(PREFIX, path.join(__dirname, './commands'), true);
 const froggerID = '219091519590629376';
-const turtlerID = '713530503331840051';
 const matchKillin = /k+i+l+i+n+(?!g)/i;
 
 
@@ -58,20 +57,16 @@ async function onMessage (msg: Discord.Message): Promise<void> {
     msg.react('<:frog1:790563843088711700>').catch();
   }
 
-  if (msg.author.id === froggerID && Math.random() > 0.5) {
+  if (msg.author.id === froggerID && Math.random() > 0.05) {
     msg.react('<:frog1:790563843088711700>').catch();
     msg.react('🚿').catch();
-  }
-
-  if (msg.author.id === turtlerID && Math.random() > 0.95) {
-    msg.react('🐢').catch();
   }
 
   if (matchKillin.test(msg.content)) {
     await msg.react('<:hacker:793643471084847144>');
   }
 
-  disableBaseTip(msg);
+  // disableBaseTip(msg);
   CMDM.evaluate(msg);
 }
 
