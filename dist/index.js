@@ -52,7 +52,7 @@ function onMessage(msg) {
         if (matchFrog.test(msg.content)) {
             msg.react('<:frog1:790563843088711700>').catch();
         }
-        if (msg.author.id === froggerID && Math.random() > 0.05) {
+        if (msg.author.id === froggerID && Math.random() > 0.95) {
             msg.react('<:frog1:790563843088711700>').catch();
             msg.react('🚿').catch();
         }

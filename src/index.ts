@@ -57,7 +57,7 @@ async function onMessage (msg: Discord.Message): Promise<void> {
     msg.react('<:frog1:790563843088711700>').catch();
   }
 
-  if (msg.author.id === froggerID && Math.random() > 0.05) {
+  if (msg.author.id === froggerID && Math.random() > 0.95) {
     msg.react('<:frog1:790563843088711700>').catch();
     msg.react('🚿').catch();
   }
@@ -80,4 +80,5 @@ function init () {
 
   console.log('Successfuly loaded', commandNames.length, 'command(s)!');
   console.log(commandNames);
+
 }
