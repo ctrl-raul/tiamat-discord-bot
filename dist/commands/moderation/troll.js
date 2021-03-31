@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const BullyingManager_1 = __importDefault(require("../../BullyingManager"));
 const regex_userMention = /<@!(\d{18})>/;
 const regex_userID = /(\d{18})/;
-const regex_emoji = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|<:.+?:\d{18}>)/;
+const regex_emoji = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|<a{0,1}:.+?:\d{18}>)/;
 const syntax = [
     [regex_userMention, regex_userID],
     [regex_emoji],
@@ -25,6 +25,7 @@ const command = {
     permissions: ['MANAGE_MESSAGES'],
     execute({ msg, args }) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(args);
             const words = args.split(' ');
             if (words[0] === 'clear') {
                 const { error } = BullyingManager_1.default.remUser(words[1]);
