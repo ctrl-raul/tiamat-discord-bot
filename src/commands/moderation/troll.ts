@@ -32,6 +32,7 @@ const command: CommandModule = {
         const { error } = BullyingManager.addReaction(userID, ratio, emojiID);
 
         if (error) {
+          msg.react('❌');
           msg.author.send(error).catch();
         } else {
           // Everything done right, yay!
@@ -45,7 +46,15 @@ const command: CommandModule = {
       }
       
     } else {
-      BullyingManager.remReaction(userID, emojiID);
+      const { error } = BullyingManager.remReaction(userID, emojiID);
+
+      if (!error) {
+        msg.react('✔️');
+      } else {
+        msg.channel.send(error).then(m => {
+          setTimeout(() => m.delete(), 3000);
+        }).catch();
+      }
     }
   }
 

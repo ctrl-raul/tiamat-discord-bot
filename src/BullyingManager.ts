@@ -124,7 +124,7 @@ const BullyingManager = new (class {
     return { error: 'Reactions system not operating, try again later.' };
   }
 
-  public remReaction (userID: string, emojiID: string): boolean {
+  public remReaction (userID: string, emojiID: string): { error: string | null } {
 
     if (this.operable) {
       try {
@@ -141,28 +141,23 @@ const BullyingManager = new (class {
               delete data[userID];
             }
           } else {
-            // Reaction not in DB
-            console.log('reaction not in db');
+            return { error: `This reaction isn't being used.` };
           }
 
         } else {
-          // User not in DB
-          console.log('User not in DB');
+          return { error: `There are no reactions for this user.` };
         }
 
         this.cache = data;
 
         fs.writeFileSync(this.DBFilePath, JSON.stringify(data, null, 2));
 
-        return true;
-
       } catch (err) {
-        console.error(`Failed to add bullying reaction:`, err);
+        return { error: `Failed to add bullying reaction.` };
       }
     }
 
-    return false;
-
+    return { error: null };
   }
 
 })();

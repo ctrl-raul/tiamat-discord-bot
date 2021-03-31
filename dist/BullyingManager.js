@@ -102,21 +102,20 @@ const BullyingManager = new (class {
                         }
                     }
                     else {
-                        console.log('reaction not in db');
+                        return { error: `This reaction isn't being used.` };
                     }
                 }
                 else {
-                    console.log('User not in DB');
+                    return { error: `There are no reactions for this user.` };
                 }
                 this.cache = data;
                 fs_1.default.writeFileSync(this.DBFilePath, JSON.stringify(data, null, 2));
-                return true;
             }
             catch (err) {
-                console.error(`Failed to add bullying reaction:`, err);
+                return { error: `Failed to add bullying reaction.` };
             }
         }
-        return false;
+        return { error: null };
     }
 })();
 exports.default = BullyingManager;
