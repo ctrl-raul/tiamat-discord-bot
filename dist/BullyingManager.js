@@ -117,6 +117,25 @@ const BullyingManager = new (class {
         }
         return { error: null };
     }
+    remUser(userID) {
+        if (this.operable) {
+            try {
+                const data = this.getFreshData();
+                if (userID in data) {
+                    delete data[userID];
+                }
+                else {
+                    return { error: `User '${userID}' not in database` };
+                }
+                this.cache = data;
+                fs_1.default.writeFileSync(this.DBFilePath, JSON.stringify(data, null, 2));
+            }
+            catch (err) {
+                return { error: `Failed to stop bullying '${userID}'` };
+            }
+        }
+        return { error: null };
+    }
     getData() {
         return JSON.parse(JSON.stringify(this.cache));
     }

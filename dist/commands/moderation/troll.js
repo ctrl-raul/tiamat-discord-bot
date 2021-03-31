@@ -13,14 +13,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const BullyingManager_1 = __importDefault(require("../../BullyingManager"));
-const regex_userMentionOrID = /<@!(\d{18})>|(\d{18})/;
+const regex_userMention = /<@!(\d{18})>/;
+const regex_userID = /(\d{18})/;
 const regex_emoji = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|<:.+?:\d{18}>)/;
-const syntax = [regex_userMentionOrID, regex_emoji, /(\d+)/];
+const syntax = [
+    [regex_userMention, regex_userID],
+    [regex_emoji],
+    [/(\d+)/],
+];
 const command = {
     permissions: ['MANAGE_MESSAGES'],
     execute({ msg, args }) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (args === 'data') {
+            const words = args.split(' ');
+            if (words[0] === 'clear') {
+                const { error } = BullyingManager_1.default.remUser(words[1]);
+                if (!error) {
+                    msg.react('✔️');
+                }
+                else {
+                    msg.channel.send(error).then(m => {
+                        setTimeout(() => m.delete(), 3000);
+                    }).catch();
+                }
+                return;
+            }
+            if (words[0] === 'data') {
                 const lines = [
                     '```json',
                     JSON.stringify(BullyingManager_1.default.getData(), null, 2),
@@ -29,15 +47,22 @@ const command = {
                 msg.channel.send(lines.join('\n'));
                 return;
             }
-            const words = args.split(' ');
-            const validSyntax = syntax.every((token, i) => token.test(words[i]));
+            const validSyntax = syntax.every((tokens, i) => {
+                return tokens.some(token => token.test(words[i]));
+            });
             if (!validSyntax) {
                 msg.react('❌');
+                msg.channel.send('Invalid syntax');
                 return;
             }
             ;
-            const [userID, emojiID, procent] = syntax.map((token, i) => {
-                const match = words[i].match(token);
+            const [userID, emojiID, procent] = syntax.map((tokens, i) => {
+                let match;
+                for (let j = 0; j < tokens.length; j++) {
+                    match = words[i].match(tokens[j]);
+                    if (match)
+                        break;
+                }
                 return match[1];
             });
             const ratio = Number(procent) / 100;
@@ -47,7 +72,9 @@ const command = {
                     const { error } = BullyingManager_1.default.addReaction(userID, ratio, emojiID);
                     if (error) {
                         msg.react('❌');
-                        msg.author.send(error).catch();
+                        msg.channel.send(error).then(m => {
+                            setTimeout(() => m.delete(), 3000);
+                        }).catch();
                     }
                     else {
                     }
