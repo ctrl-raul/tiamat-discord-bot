@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const matchMsgID = /\d{18}$/;
 const command = {
+    enabled: false,
     execute({ msg, args }) {
         return __awaiter(this, void 0, void 0, function* () {
             const match = args.match(matchMsgID);

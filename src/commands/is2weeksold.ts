@@ -4,6 +4,8 @@ const matchMsgID = /\d{18}$/;
 
 const command: CommandModule = {
 
+  enabled: false,
+
   async execute ({ msg, args }) {
 
     const match = args.match(matchMsgID) as RegExpMatchArray;

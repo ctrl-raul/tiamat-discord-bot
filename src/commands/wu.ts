@@ -4,8 +4,6 @@ import { CommandModule } from '../libs/DiscordCommandsManager';
 
 const command: CommandModule = {
 
-  enabled: false,
-
   execute (args) {
 
     const { msg, onError } = args;

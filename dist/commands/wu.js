@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const embedLink_1 = __importDefault(require("../utils/embedLink"));
 const command = {
-    enabled: false,
     execute(args) {
         const { msg, onError } = args;
         const embed = embedLink_1.default('Workshop Unlimited', 'https://workshop-unlimited.vercel.app/', '#06222a', args);
