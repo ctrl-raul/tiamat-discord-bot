@@ -160,6 +160,10 @@ const BullyingManager = new (class {
     return { error: null };
   }
 
+  public getData (): DataType {
+    return JSON.parse(JSON.stringify(this.cache));
+  }
+
 })();
 
 

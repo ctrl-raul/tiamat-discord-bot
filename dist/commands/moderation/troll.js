@@ -13,19 +13,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const BullyingManager_1 = __importDefault(require("../../BullyingManager"));
-const matchSyntax = /<@!(\d+)>\s+(.+)\s+(\d+)/;
+const regex_userMentionOrID = /<@!(\d{18})>|(\d{18})/;
+const regex_emoji = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|<:.+?:\d{18}>)/;
+const syntax = [regex_userMentionOrID, regex_emoji, /(\d+)/];
 const command = {
     permissions: ['MANAGE_MESSAGES'],
     execute({ msg, args }) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(args);
-            const match = args.match(matchSyntax);
-            if (!match) {
+            if (args === 'data') {
+                const lines = [
+                    '```json',
+                    JSON.stringify(BullyingManager_1.default.getData(), null, 2),
+                    '```',
+                ];
+                msg.channel.send(lines.join('\n'));
+                return;
+            }
+            const words = args.split(' ');
+            const validSyntax = syntax.every((token, i) => token.test(words[i]));
+            if (!validSyntax) {
                 msg.react('❌');
                 return;
             }
             ;
-            const [_, userID, emojiID, procent] = match;
+            const [userID, emojiID, procent] = syntax.map((token, i) => {
+                const match = words[i].match(token);
+                return match[1];
+            });
             const ratio = Number(procent) / 100;
             if (ratio > 0) {
                 try {

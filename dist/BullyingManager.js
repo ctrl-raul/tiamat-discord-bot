@@ -117,5 +117,8 @@ const BullyingManager = new (class {
         }
         return { error: null };
     }
+    getData() {
+        return JSON.parse(JSON.stringify(this.cache));
+    }
 })();
 exports.default = BullyingManager;

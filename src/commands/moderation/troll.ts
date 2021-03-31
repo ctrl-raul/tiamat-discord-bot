@@ -2,7 +2,13 @@ import { CommandModule } from '../../libs/DiscordCommandsManager';
 import BullyingManager from '../../BullyingManager';
 
 
-const matchSyntax = /<@!(\d+)>\s+(.+)\s+(\d+)/;
+// const matchSyntax = /<@!(\d+)>\s+(.+)\s+(\d+)/;
+
+
+const regex_userMentionOrID = /<@!(\d{18})>|(\d{18})/;
+const regex_emoji = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|<:.+?:\d{18}>)/;
+
+const syntax = [regex_userMentionOrID, regex_emoji, /(\d+)/];
 
 
 const command: CommandModule = {
@@ -11,16 +17,33 @@ const command: CommandModule = {
 
   async execute ({ msg, args }) {
 
-    console.log(args);
+    if (args === 'data') {
 
-    const match = args.match(matchSyntax);
+      const lines = [
+        '```json',
+        JSON.stringify(BullyingManager.getData(), null, 2),
+        '```',
+      ];
 
-    if (!match) {
+      msg.channel.send(lines.join('\n'));
+      return;
+    }
+
+    const words = args.split(' ');
+    const validSyntax = syntax.every((token, i) => token.test(words[i]));
+
+    // const match = args.match(matchSyntax);
+
+    if (!validSyntax) {
       msg.react('❌');
       return;
     };
 
-    const [_, userID, emojiID, procent] = match;
+    const [userID, emojiID, procent] = syntax.map((token, i) => {
+      const match = words[i].match(token) as RegExpMatchArray;
+      return match[1];
+    });
+
     const ratio = Number(procent) / 100;
 
     if (ratio > 0) {
