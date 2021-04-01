@@ -5,13 +5,14 @@ import BullyingManager from '../../BullyingManager';
 // const matchSyntax = /<@!(\d+)>\s+(.+)\s+(\d+)/;
 
 
-const regex_userMention = /<@!(\d{18})>/;
-const regex_userID = /(\d{18})/;
-const regex_emoji = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|<a{0,1}:.+?:\d{18}>)/;
+const regex_userMention = /^<@!(\d{18})>$/;
+const regex_userID = /^(\d{18})$/;
+const regex_emoji = /^((?:\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]){1,2})$/;
+const regex_discordEmoji = /^(<\w?:\w+?:\d{18}>)$/;
 
 const syntax = [
   [regex_userMention, regex_userID],
-  [regex_emoji],
+  [regex_emoji, regex_discordEmoji],
   [/(\d+)/],
 ];
 
@@ -96,9 +97,7 @@ const command: CommandModule = {
 
       } catch (err) {
         // For now we just assume the error is because it can't use the emoji #TODO
-        msg.channel.send(`Aw <@!${msg.author.id}>, I can only use emojis from servers I'm in.`).then(m => {
-          setTimeout(() => m.delete(), 3000);
-        }).catch();
+        msg.channel.send(`Aw <@!${msg.author.id}>, that's either an invalid emoji or I can't use it. (I can only use emojis from servers I'm in)`).catch();
       }
       
     } else {
