@@ -2,80 +2,85 @@ import Discord from 'discord.js';
 import dotenv from 'dotenv';
 import path from 'path';
 import BullyingManager from './misc/BullyingManager';
-import discordCMDM from './libs/DiscordCommandsManager';
+import CommandsManager from './CommandsManager';
 // import disableBaseTip from './misc/disableBaseTip';
+import ReactToText from './misc/ReactToText';
 import env from './utils/env';
 
 
 dotenv.config();
 
 
+const LOCALLY = env('LOCALLY', 'false');
 const PREFIX_PROD = '+';
-const PREFIX_DEV = '-';
-const PREFIX = env('LOCALLY', 'false') === 'true' ? PREFIX_DEV : PREFIX_PROD;
-const matchFrog = /f+r+[o0]+g+|g+r+[e3]+n+[o0]+u+[i1]+l+[e3]+/i; // Matches variants of "frog" or "grenouille" (French for frog)
+const PREFIX = LOCALLY ? '-' : PREFIX_PROD;
+
 
 const client = new Discord.Client();
-const CMDM = discordCMDM(PREFIX, path.join(__dirname, './commands'), true);
-const matchKillin = /k+i+l+i+n+(?!g)/i;
+const reactToText = new ReactToText(client);
+const commandsManager = new CommandsManager({
+  prefix: PREFIX,
+  commandsDir: path.join(__dirname, './commands'),
+  onExecutingCommand: cmd => console.log(`Executing command '${cmd.name}'`),
+  onCommandExecutionError: (cmd, err) => console.error(`Failed to execute command '${cmd.name}':`, err),
+});
 
 
-init();
+reactToText.add(/f+r+[o0]+g+|g+r+[e3]+n+[o0]+u+[i1]+l+[e3]+/i, '<:frog1:790563843088711700>');
+reactToText.add(/k+i+l+i+n+(?!g)/i, '<:hacker:793643471084847144>');
 
+client.on('ready', () => {
 
-function onReady () {
-
-  if (!client.user) {
-    return;
-  }
+  if (!client.user) return;
 
   client.user.setPresence({
     status: 'dnd',
-
     activity: {
       name: 'prefix: ' + PREFIX_PROD
     }
-  });
+  }).catch();
 
-  client.user.setUsername('Tiamat');
+  client.user.setUsername('Tiamat').catch();
 
   console.log(`Logged in as ${client.user.tag}!`);
 
-}
+});
 
-async function onMessage (msg: Discord.Message): Promise<void> {
+client.on('message', async msg => {
 
   // Ignore messages from bots
-  if (msg.author.bot) {
-    return;
-  }
+  if (msg.author.bot) return;
 
   if (msg.channel.type === 'dm' && msg.author.id !== client.user?.id) {
-    msg.channel.send(`I don't like DMs.`);
+    msg.channel.send(`I don't like DMs.`).catch();
   }
 
-  if (matchFrog.test(msg.content)) {
-    msg.react('<:frog1:790563843088711700>').catch();
-  }
 
-  if (matchKillin.test(msg.content)) {
-    await msg.react('<:hacker:793643471084847144>');
-  }
-
-  // disableBaseTip(msg);
   BullyingManager.evaluate(msg);
-  CMDM.evaluate(msg);
-}
+  const fail = commandsManager.evaluate(msg);
 
-function init () {
+  if (fail !== null) {
+    switch (fail.name) {
+      case 'COMMAND_DISABLED':
+      case 'MISSING_PERMISSIONS':
+        msg.react('❌').catch();
+        break;
+      case 'PRIVATE_MESSAGE':
+        msg.channel.send(`I don't like PMs`).catch();
+        break;
+    }
+  }
 
-  const commandNames = Object.keys(CMDM.cmds);
+});
 
-  client.on('ready', onReady);
-  client.on('message', onMessage);
-  client.login(env('TOKEN'));
 
-  console.log('Successfuly loaded', commandNames.length, 'command(s)!');
+client.login(env('TOKEN'));
+
+
+{
+  const commandNames = Object.keys(commandsManager.commands);
+
+  console.log(`Running in ${LOCALLY ? 'dev' : 'prod'}. (prefix: ${PREFIX})`);
+  console.log(`Successfuly loaded ${commandNames.length} commands:`);
   console.log(commandNames);
-
 }

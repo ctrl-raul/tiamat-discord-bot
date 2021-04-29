@@ -1,4 +1,4 @@
-import { CommandModule } from '../../libs/DiscordCommandsManager';
+import { CommandModule } from '../../CommandsManager';
 
 const matchMsgID = /\d{18}$/;
 

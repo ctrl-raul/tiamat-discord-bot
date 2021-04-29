@@ -1,4 +1,4 @@
-import { CommandModule } from '../libs/DiscordCommandsManager';
+import { CommandModule } from '../CommandsManager';
 import BullyingManager from '../misc/BullyingManager';
 
 

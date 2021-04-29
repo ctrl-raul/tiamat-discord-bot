@@ -1,4 +1,4 @@
-import { CommandModule } from '../../libs/DiscordCommandsManager';
+import { CommandModule } from '../../CommandsManager';
 import nodeFetch from 'node-fetch';
 import { MessageEmbed } from 'discord.js';
 import statTemplates, { StatKey } from '../../data/stat-templates';
@@ -22,8 +22,8 @@ interface WUItemsPack {
 
 
 const itemsPackURL = 'https://gist.githubusercontent.com/ctrl-raul/3b5669e4246bc2d7dc669d484db89062/raw/';
-  let itemsPack: WUItemsPack | null = null;
-  let loadingItemsPack = true;
+let itemsPack: WUItemsPack | null = null;
+let loadingItemsPack = true;
 
 
 const colors = {
@@ -43,6 +43,8 @@ getJSON<WUItemsPack>(itemsPackURL)
 
 
 const command: CommandModule = {
+
+  permissions: 'MANAGE_MESSAGES',
 
   execute ({ args, msg, onError }) {
 

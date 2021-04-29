@@ -1,5 +1,5 @@
 import { MessageEmbed } from 'discord.js';
-import { CommandExecuteArguments } from '../libs/DiscordCommandsManager';
+import { CommandExecuteArguments } from '../CommandsManager';
 
 export default function embedLink (title: string, link: string, color: string, args: CommandExecuteArguments): MessageEmbed {
 

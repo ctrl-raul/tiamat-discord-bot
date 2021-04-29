@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import { CommandModule } from '../../libs/DiscordCommandsManager';
+import { CommandModule } from '../../CommandsManager';
 
 // TODO: Delete messages from specific users
 
