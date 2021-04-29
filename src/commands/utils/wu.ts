@@ -1,5 +1,5 @@
-import embedLink from '../utils/embedLink';
-import { CommandModule } from '../libs/DiscordCommandsManager';
+import embedLink from '../../utils/embedLink';
+import { CommandModule } from '../../libs/DiscordCommandsManager';
 
 
 const command: CommandModule = {

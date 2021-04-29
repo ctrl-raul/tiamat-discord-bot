@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import dotenv from 'dotenv';
 import path from 'path';
-import BullyingManager from './BullyingManager';
+import BullyingManager from './misc/BullyingManager';
 import discordCMDM from './libs/DiscordCommandsManager';
 // import disableBaseTip from './misc/disableBaseTip';
 import env from './utils/env';
@@ -31,6 +31,7 @@ function onReady () {
 
   client.user.setPresence({
     status: 'dnd',
+
     activity: {
       name: 'prefix: ' + PREFIX_PROD
     }

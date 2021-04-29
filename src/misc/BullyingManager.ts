@@ -189,6 +189,21 @@ const BullyingManager = new (class {
     return JSON.parse(JSON.stringify(this.cache));
   }
 
+  public setData (json: string): null | { error: string } {
+    try {
+      console.log(json);
+      this.cache = JSON.parse(json);
+    } catch (err) {
+      return { error: `Invalid data` };
+    }
+    try {
+      fs.writeFileSync(this.DBFilePath, JSON.stringify(this.cache, null, 2));
+    } catch (err) {
+      return { error: `I committed a mistake, please try again` };
+    }
+    return null;
+  }
+
 })();
 
 
