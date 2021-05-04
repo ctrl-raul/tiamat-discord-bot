@@ -53,6 +53,7 @@ client.on('message', async msg => {
 
   if (msg.channel.type === 'dm' && msg.author.id !== client.user?.id) {
     msg.channel.send(`I don't like DMs.`).catch();
+    return;
   }
 
 
