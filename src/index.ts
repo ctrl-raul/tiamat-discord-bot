@@ -11,7 +11,7 @@ import env from './utils/env';
 dotenv.config();
 
 
-const LOCALLY = env('LOCALLY', 'false');
+const LOCALLY = env('LOCALLY', 'false') === 'true';
 const PREFIX_PROD = '+';
 const PREFIX = LOCALLY ? '-' : PREFIX_PROD;
 
