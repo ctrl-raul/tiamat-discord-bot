@@ -39,14 +39,18 @@ getJSON<WUItemsPack>(itemsPackURL)
   })
   .finally(() => {
     loadingItemsPack = false;
-  })
+  });
 
 
 const command: CommandModule = {
 
-  permissions: 'MANAGE_MESSAGES',
+  // permissions: 'MANAGE_MESSAGES',
 
   execute ({ args, msg, onError }) {
+
+    if (!(['802231408785489961', '789536414916018206'].includes(msg.channel.id))) {
+      msg.react('❌').catch();
+    }
 
     if (!itemsPack) {
       if (loadingItemsPack) {
