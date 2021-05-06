@@ -20,7 +20,7 @@ const CommandsManager_1 = __importDefault(require("./CommandsManager"));
 const ReactToText_1 = __importDefault(require("./misc/ReactToText"));
 const env_1 = __importDefault(require("./utils/env"));
 dotenv_1.default.config();
-const LOCALLY = env_1.default('LOCALLY', 'false');
+const LOCALLY = env_1.default('LOCALLY', 'false') === 'true';
 const PREFIX_PROD = '+';
 const PREFIX = LOCALLY ? '-' : PREFIX_PROD;
 const client = new discord_js_1.default.Client();
@@ -51,6 +51,7 @@ client.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
         return;
     if (msg.channel.type === 'dm' && msg.author.id !== ((_a = client.user) === null || _a === void 0 ? void 0 : _a.id)) {
         msg.channel.send(`I don't like DMs.`).catch();
+        return;
     }
     BullyingManager_1.default.evaluate(msg);
     const fail = commandsManager.evaluate(msg);

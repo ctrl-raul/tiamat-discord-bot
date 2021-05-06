@@ -1,12 +1,14 @@
 import { CommandModule } from '../../CommandsManager';
 import nodeFetch from 'node-fetch';
-import { MessageEmbed } from 'discord.js';
+import Discord from 'discord.js';
 import statTemplates, { StatKey } from '../../data/stat-templates';
+import UsesHistory from '../../utils/UsesHistory';
 
 
 interface WUItem {
   name: string;
   element: 'PHYSICAL' | 'EXPLOSIVE' | 'ELECTRIC';
+  image: string;
   stats: { [K in StatKey]: number | [number, number] };
 }
 
@@ -15,7 +17,7 @@ interface WUItemsPack {
     name: string;
     description: string;
     key: string;
-    baseURL: string;
+    base_url: string;
   };
   items: WUItem[];
 }
@@ -32,6 +34,9 @@ const colors = {
   ELECTRIC: '#00aaff',
 };
 
+const history = new UsesHistory(60);
+const maxUsesForTime = 1;
+
 
 getJSON<WUItemsPack>(itemsPackURL)
   .then(json => {
@@ -46,10 +51,21 @@ const command: CommandModule = {
 
   // permissions: 'MANAGE_MESSAGES',
 
-  execute ({ args, msg, onError }) {
+  execute ({ args, msg, prefix, cmd, onError }) {
 
     if (!(['802231408785489961', '789536414916018206'].includes(msg.channel.id))) {
       msg.react('❌').catch();
+      return;
+    }
+
+    const itemRequestsCount = history.getCount(msg.author.id);
+
+    console.log({ itemRequestsCount, maxUsesForTime })
+
+    if (itemRequestsCount > maxUsesForTime) {
+      msg.reply(
+        `You have already requested items ${itemRequestsCount} times in the last ${history.entryLifetimeSeconds} seconds, please consider using https://workshop-unlimited.vercel.app/ instead. \n(Tip: You can use +wu to get that link)`
+      );
       return;
     }
 
@@ -67,20 +83,29 @@ const command: CommandModule = {
     for (const item of itemsPack.items) {
       if (item.name.toLowerCase().replace(/\s+/g, '') === name) {
 
-        const statLines: string[] = [];
+        const embedLines: string[] = [];
 
         for (const [key, value] of Object.entries(item.stats)) {
           const template = statTemplates[key] as typeof statTemplates[StatKey];
-          const valueStr = typeof value === 'number' ? value.toString() : value.join('-');
-          statLines.push(`${template.name}: **${valueStr}**`);
+          const valueStr = Array.isArray(value) ? value.join('-') : String(value);
+          embedLines.push(`${template.name}: **${valueStr}**`);
         }
 
-        const embed = new MessageEmbed();
-        embed.setColor(colors[item.element])
-        embed.addField(item.name, statLines.join('\n'));
-        // embed.setImage(itemsPack.config.baseURL + item.name.replace(/\s+/g, '') + '.png');
+        embedLines.push(
+          '\u200b',
+          `\`${prefix + cmd.name} ${item.name}\` requested by <@${msg.author.id}>`
+        );
 
-        msg.channel.send(embed).catch(onError);
+        const embed = new Discord.MessageEmbed();
+        embed.setColor(colors[item.element])
+        embed.addField(item.name, embedLines.join('\n'));
+        embed.setThumbnail(item.image.replace('%url%', itemsPack.config.base_url));
+
+        msg.channel.send(embed)
+          .then(() => history.add(msg.author.id, Date.now()))
+          .catch(onError);
+
+        msg.delete().catch(onError);
 
         return;
       }

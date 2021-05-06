@@ -84,4 +84,5 @@ client.login(env('TOKEN'));
   console.log(`Running in ${LOCALLY ? 'dev' : 'prod'}. (prefix: ${PREFIX})`);
   console.log(`Successfuly loaded ${commandNames.length} commands:`);
   console.log(commandNames);
+
 }
